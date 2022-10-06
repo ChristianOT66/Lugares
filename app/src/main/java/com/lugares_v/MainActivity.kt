@@ -1,8 +1,8 @@
 package com.lugares_v
-
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -29,28 +29,34 @@ class MainActivity : AppCompatActivity() {
         auth = Firebase.auth
 
         //Definir el evento onClick del botón Register
-        binding.vtRegister.setOnClickListener { haceRegistro() }
+        binding.btRegister.setOnClickListener { haceRegistro() }
 
         //Definir el evento onClick del botón Register
-        binding.vtLogin.setOnClickListener { haceLogin() }
+        binding.btLogin.setOnClickListener { haceLogin() }
         }
+
+
 
     private fun haceRegistro(){
         //Recupero la información que el usuario escribió en el app
+        Log.d("Registrandose","Haciendo llamado a creación")
         val email = binding.etCorreo.text.toString()
         val clave = binding.etClave.text.toString()
 
         //Utilizo  el objeto auth para hacer el registro...
         auth.createUserWithEmailAndPassword(email,clave).addOnCompleteListener(this){ task ->
             if (task.isSuccessful){  //Si se logró... se creó el usuario
+                Log.d("Registrandose","Se registró")
                 val user = auth.currentUser
                 refresca(user)
 
             }else{ //Si no se logró hubo un error...
+                Log.d("Registrandose","Error de registro")
                 Toast.makeText(baseContext,"Falló",Toast.LENGTH_LONG).show()
                 refresca(null)
             }
         }
+        Log.d("Registrandose","Sale del proceso...")
     }
 
     private fun refresca(user: FirebaseUser?) {
@@ -62,4 +68,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun haceLogin(){
-}}
+
+        val email = binding.etCorreo.text.toString()
+        val clave = binding.etClave.text.toString()
+
+        Log.d("Autenticandose","Haciendo llamado de autenticación")
+        auth.signInWithEmailAndPassword(email,clave).addOnCompleteListener(this){ task ->
+            if (task.isSuccessful){  //Si se logró... se creó el usuario
+                Log.d("Autenticado","Se autenticó...")
+                val user = auth.currentUser
+                refresca(user)
+
+            }else{ //Si no se logró hubo un error...
+                Log.d("Autenticado","Error de autenticación")
+                Toast.makeText(baseContext,"Falló",Toast.LENGTH_LONG).show()
+                refresca(null)
+            }
+        }
+        Log.d("Autenticando","Se registró")
+    }
+}
