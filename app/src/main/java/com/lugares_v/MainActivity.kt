@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
                 refresca(user)
 
             }else{ //Si no se logró hubo un error...
-                Log.d("Registrandose","Error de registro")
+                Log.e("Registrandose","Error de registro")
                 Toast.makeText(baseContext,"Falló",Toast.LENGTH_LONG).show()
                 refresca(null)
             }
@@ -80,11 +80,20 @@ class MainActivity : AppCompatActivity() {
                 refresca(user)
 
             }else{ //Si no se logró hubo un error...
-                Log.d("Autenticado","Error de autenticación")
+                Log.e("Autenticado","Error de autenticación")
                 Toast.makeText(baseContext,"Falló",Toast.LENGTH_LONG).show()
                 refresca(null)
             }
         }
         Log.d("Autenticando","Se registró")
     }
+
+
+    //Esto se ejecuta toda vez que se presente el app en la pantalla, valida si hay un usuario autenticado
+    public override fun onStart() {
+        super.onStart()
+        val usuario = auth.currentUser
+        refresca(usuario)
+    }
+
 }
