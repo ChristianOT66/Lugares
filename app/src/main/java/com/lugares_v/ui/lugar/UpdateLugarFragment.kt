@@ -8,13 +8,19 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.lugares_v.R
-import com.lugares_v.databinding.FragmentAddLugarBinding
+import com.lugares_v.databinding.FragmentUpdateLugarBinding
 import com.lugares_v.model.Lugar
 import com.lugares_v.viewmodel.LugarViewModel
 
-class AddLugarFragment : Fragment() {
-    private var _binding: FragmentAddLugarBinding? = null
+class UpdateLugarFragment : Fragment() {
+
+    //Se recupera un argumento pasado...
+
+    private val args by navArgs<UpdateLugarFragmentArgs>()
+
+    private var _binding: FragmentUpdateLugarBinding? = null
     private val binding get() = _binding!!
     private lateinit var lugarViewModel: LugarViewModel
 
@@ -24,9 +30,15 @@ class AddLugarFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         lugarViewModel = ViewModelProvider(this).get(LugarViewModel::class.java)
-        _binding = FragmentAddLugarBinding.inflate(inflater, container, false)
+        _binding = FragmentUpdateLugarBinding.inflate(inflater, container, false)
 
-        binding.btAddLugar.setOnClickListener{ addLugar() }
+        //Se pasan los valores a los campos de la pantalla
+        binding.etNombre.setText(args.lugar.nombre)
+        binding.etCorreoLugar.setText(args.lugar.correo)
+        binding.etTelefono.setText(args.lugar.telefono)
+        binding.etWeb.setText(args.lugar.web)
+
+        binding.btUpdateLugar.setOnClickListener{ updateLugar() }
 
 
 
@@ -34,16 +46,21 @@ class AddLugarFragment : Fragment() {
     }
 
 //Efectivamente hace el registro del lugar en la base de datos
-    private fun addLugar() {
+    private fun updateLugar() {
         val nombre=binding.etNombre.text.toString()
         val correo=binding.etCorreoLugar.text.toString()
         val telefono=binding.etTelefono.text.toString()
         val web=binding.etWeb.text.toString()
 
     if (nombre.isNotEmpty()){
-       val lugar = Lugar(0, nombre,correo,telefono,web,0.0,0.0,0.0,"","")
+       val lugar = Lugar(args.lugar.id, nombre,correo,telefono,web,
+           args.lugar.latitud,
+           args.lugar.longitud,
+           args.lugar.altura,
+           args.lugar.rutaAudio,
+           args.lugar.rutaImagen)
         lugarViewModel.saveLugar(lugar)
-        Toast.makeText(requireContext(),getString(R.string.msg_lugar_added),
+        Toast.makeText(requireContext(),getString(R.string.msg_lugar_updated),
         Toast.LENGTH_SHORT).show()
         findNavController().navigate(R.id.action_addLugarFragment_to_nav_lugar)
     } else {  //No hay info del lugar
