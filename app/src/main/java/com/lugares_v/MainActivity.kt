@@ -1,17 +1,27 @@
 package com.lugares_v
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.Api.Client
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuth.IdTokenListener
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.lugares_v.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var googleSignInClient: GoogleSignInClient
 
 
 //Definimos un objeto para acceder a la autenticación de Firebase
@@ -33,8 +43,45 @@ class MainActivity : AppCompatActivity() {
 
         //Definir el evento onClick del botón Register
         binding.btLogin.setOnClickListener { haceLogin() }
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id_r))
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(this,gso)
+        binding.btGoogle.setOnClickListener { googleSignIn() }
         }
 
+    private fun googleSignIn() {
+        val signInIntent = googleSignInClient.signInIntent
+        startActivityForResult(signInIntent,5000)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 5000) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val cuenta = task.getResult(ApiException::class.java)!!
+                firebaseAuthWithGoogle(cuenta.idToken!!)
+            } catch (e: ApiException) {
+
+            }
+        }
+    }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken,null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener (this) { task ->
+                if (task.isSuccessful) {
+                    val user=auth.currentUser
+                    refresca(user)
+                } else {
+                    refresca(null)
+                }
+            }
+    }
 
 
     private fun haceRegistro(){
